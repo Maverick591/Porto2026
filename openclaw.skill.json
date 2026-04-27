@@ -1,7 +1,7 @@
 {
   "name": "Porto2026",
-  "version": "1.1.0",
-  "description": "Controle financeiro da viagem EHS Porto 2026 com entrada por texto, fotos/prints e áudio.",
+  "version": "1.2.0",
+  "description": "Controle financeiro da viagem EHS Porto 2026 com entrada por texto, fotos/prints e áudio, auth por API key, dashboard e exportação CSV.",
   "entrypoint": "porto2026.api:app",
   "runtime": "python",
   "commands": [
@@ -28,6 +28,36 @@
       "endpoint": "/summary",
       "method": "GET",
       "description": "Consulta resumo financeiro atualizado."
+    },
+    {
+      "name": "consultar_despesas",
+      "endpoint": "/expenses",
+      "method": "GET",
+      "description": "Lista as despesas mais recentes."
+    },
+    {
+      "name": "atualizar_despesa",
+      "endpoint": "/expense/{expense_id}",
+      "method": "PATCH",
+      "description": "Corrige manualmente uma despesa."
+    },
+    {
+      "name": "excluir_despesa",
+      "endpoint": "/expense/{expense_id}",
+      "method": "DELETE",
+      "description": "Exclui uma despesa."
+    },
+    {
+      "name": "exportar_csv",
+      "endpoint": "/export/csv",
+      "method": "GET",
+      "description": "Exporta todas as despesas em CSV."
+    },
+    {
+      "name": "abrir_dashboard",
+      "endpoint": "/dashboard",
+      "method": "GET",
+      "description": "Abre o dashboard web simples."
     }
   ]
 }

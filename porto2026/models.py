@@ -3,7 +3,8 @@ from __future__ import annotations
 from datetime import date, datetime
 from enum import Enum
 from typing import Optional, Literal
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Currency(str, Enum):
@@ -44,6 +45,24 @@ class ParsedExpense(BaseModel):
     notes: Optional[str] = None
 
 
+class ExpensePatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    expense_date: Optional[date] = None
+    category: Optional[ExpenseCategory] = None
+    description: Optional[str] = None
+    merchant: Optional[str] = None
+    person: Optional[str] = None
+    currency: Optional[Currency] = None
+    amount_original: Optional[float] = None
+    payment_method: Optional[str] = None
+    status: Optional[str] = None
+    notes: Optional[str] = None
+    raw_text: Optional[str] = None
+    attachment_url: Optional[str] = None
+    confidence: Optional[float] = None
+
+
 class ExpenseRecord(BaseModel):
     expense_id: str
     created_at: datetime
@@ -58,6 +77,7 @@ class ExpenseRecord(BaseModel):
     amount_brl: float
     payment_method: Optional[str] = None
     status: str = "Realizado"
+    attachment_url: Optional[str] = None
     source: Literal["text", "photo", "audio"] = "text"
     raw_text: str
     confidence: float = 0.75

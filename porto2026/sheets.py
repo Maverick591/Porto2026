@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import csv
+import io
 from collections import defaultdict
-from typing import List
+from datetime import datetime, date
+from itertools import zip_longest
+from typing import Any
+
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -28,6 +33,7 @@ HEADERS = [
     "amount_brl",
     "payment_method",
     "status",
+    "attachment_url",
     "source",
     "confidence",
     "notes",
@@ -54,16 +60,61 @@ class SheetsStore:
         try:
             return self.spreadsheet.worksheet(title)
         except gspread.WorksheetNotFound:
-            return self.spreadsheet.add_worksheet(title=title, rows=1000, cols=30)
+            return self.spreadsheet.add_worksheet(title=title, rows=1000, cols=40)
 
     def _ensure_headers(self) -> None:
         first_row = self.expenses_ws.row_values(1)
         if first_row != HEADERS:
-            self.expenses_ws.clear()
-            self.expenses_ws.append_row(HEADERS)
+            self.expenses_ws.update("A1", [HEADERS])
 
-    def append_expense(self, record: ExpenseRecord) -> None:
-        row = [
+    @staticmethod
+    def _parse_float(value: Any, default: float = 0.0) -> float:
+        if value in (None, ""):
+            return default
+        try:
+            return float(str(value).replace(",", "."))
+        except (TypeError, ValueError):
+            return default
+
+    @staticmethod
+    def _parse_date(value: Any) -> date | None:
+        if value in (None, ""):
+            return None
+        if isinstance(value, date):
+            return value
+        try:
+            return date.fromisoformat(str(value))
+        except ValueError:
+            return None
+
+    @staticmethod
+    def _parse_created_at(value: Any) -> datetime:
+        if isinstance(value, datetime):
+            return value
+        if value in (None, ""):
+            return datetime.now()
+        try:
+            return datetime.fromisoformat(str(value))
+        except ValueError:
+            return datetime.now()
+
+    def _row_to_record(self, row: dict[str, Any]) -> ExpenseRecord:
+        payload = dict(row)
+        payload["created_at"] = self._parse_created_at(payload.get("created_at"))
+        payload["expense_date"] = self._parse_date(payload.get("expense_date"))
+        payload["amount_original"] = self._parse_float(payload.get("amount_original"))
+        payload["exchange_rate_to_brl"] = self._parse_float(payload.get("exchange_rate_to_brl"), 1.0)
+        payload["amount_brl"] = self._parse_float(payload.get("amount_brl"))
+        payload["confidence"] = self._parse_float(payload.get("confidence"), 0.0)
+
+        for key in ("merchant", "payment_method", "attachment_url", "notes"):
+            if payload.get(key) == "":
+                payload[key] = None
+
+        return ExpenseRecord(**payload)
+
+    def _record_to_row(self, record: ExpenseRecord) -> list[Any]:
+        return [
             record.expense_id,
             record.created_at.isoformat(),
             record.expense_date.isoformat() if record.expense_date else "",
@@ -77,31 +128,99 @@ class SheetsStore:
             record.amount_brl,
             record.payment_method or "",
             record.status,
+            record.attachment_url or "",
             record.source,
             record.confidence,
             record.notes or "",
             record.raw_text,
         ]
-        self.expenses_ws.append_row(row, value_input_option="USER_ENTERED")
-        self.refresh_summary()
 
-    def list_records(self) -> List[dict]:
-        return self.expenses_ws.get_all_records()
+    def _all_rows(self) -> list[list[str]]:
+        rows = self.expenses_ws.get_all_values()
+        if not rows:
+            return []
+        return rows
+
+    def _find_row_index(self, expense_id: str) -> tuple[int, ExpenseRecord]:
+        rows = self._all_rows()
+        for row_index, row in enumerate(rows[1:], start=2):
+            row_data = {
+                header: value
+                for header, value in zip_longest(HEADERS, row, fillvalue="")
+            }
+            if row_data.get("expense_id") == expense_id:
+                return row_index, self._row_to_record(row_data)
+        raise KeyError(f"Despesa não encontrada: {expense_id}")
+
+    def append_expense(self, record: ExpenseRecord, refresh_summary: bool = True) -> None:
+        self.expenses_ws.append_row(self._record_to_row(record), value_input_option="USER_ENTERED")
+        if refresh_summary:
+            self.refresh_summary()
+
+    def append_expenses(self, records: list[ExpenseRecord], refresh_summary: bool = True) -> None:
+        if not records:
+            return
+        rows = [self._record_to_row(record) for record in records]
+        self.expenses_ws.append_rows(rows, value_input_option="USER_ENTERED")
+        if refresh_summary:
+            self.refresh_summary()
+
+    def get_expense(self, expense_id: str) -> ExpenseRecord | None:
+        try:
+            _, record = self._find_row_index(expense_id)
+            return record
+        except KeyError:
+            return None
+
+    def update_expense(self, record: ExpenseRecord, refresh_summary: bool = True) -> ExpenseRecord:
+        row_index, _ = self._find_row_index(record.expense_id)
+        self.expenses_ws.update(f"A{row_index}", [self._record_to_row(record)])
+        if refresh_summary:
+            self.refresh_summary()
+        return record
+
+    def delete_expense(self, expense_id: str, refresh_summary: bool = True) -> ExpenseRecord:
+        row_index, record = self._find_row_index(expense_id)
+        self.expenses_ws.delete_rows(row_index)
+        if refresh_summary:
+            self.refresh_summary()
+        return record
+
+    def list_expenses(self) -> list[ExpenseRecord]:
+        rows = self._all_rows()
+        if len(rows) <= 1:
+            return []
+
+        records: list[ExpenseRecord] = []
+        for row in rows[1:]:
+            row_data = {
+                header: value
+                for header, value in zip_longest(HEADERS, row, fillvalue="")
+            }
+            records.append(self._row_to_record(row_data))
+        return records
+
+    def list_records(self) -> list[dict[str, Any]]:
+        return [record.model_dump(mode="json") for record in self.list_expenses()]
+
+    def export_csv_text(self) -> str:
+        buffer = io.StringIO(newline="")
+        writer = csv.DictWriter(buffer, fieldnames=HEADERS)
+        writer.writeheader()
+        for row in self.list_records():
+            writer.writerow({header: row.get(header, "") for header in HEADERS})
+        return buffer.getvalue()
 
     def refresh_summary(self) -> SummaryResponse:
-        rows = self.list_records()
+        records = self.list_expenses()
         total_brl = 0.0
         by_category = defaultdict(float)
         by_person = defaultdict(float)
 
-        for row in rows:
-            try:
-                amount = float(str(row.get("amount_brl", 0)).replace(",", "."))
-            except Exception:
-                amount = 0.0
-
-            category = row.get("category") or "Não classificado"
-            person = row.get("person") or "Não informado"
+        for record in records:
+            amount = float(record.amount_brl or 0.0)
+            category = record.category.value
+            person = record.person or "Não informado"
 
             total_brl += amount
             by_category[category] += amount
@@ -114,25 +233,34 @@ class SheetsStore:
             total_eur_equivalent=round(total_eur_equivalent, 2),
             by_category_brl={k: round(v, 2) for k, v in sorted(by_category.items())},
             by_person_brl={k: round(v, 2) for k, v in sorted(by_person.items())},
-            count=len(rows),
+            count=len(records),
         )
 
         self._write_summary(summary)
         return summary
 
     def _write_summary(self, summary: SummaryResponse) -> None:
-        self.summary_ws.clear()
-        self.summary_ws.append_row(["Indicador", "Valor"])
-        self.summary_ws.append_row(["Total BRL", summary.total_brl])
-        self.summary_ws.append_row(["Total equivalente EUR", summary.total_eur_equivalent])
-        self.summary_ws.append_row(["Número de despesas", summary.count])
+        rows: list[list[Any]] = [
+            ["Indicador", "Valor"],
+            ["Total BRL", summary.total_brl],
+            ["Total equivalente EUR", summary.total_eur_equivalent],
+            ["Número de despesas", summary.count],
+            ["", ""],
+            ["Categoria", "Total BRL"],
+        ]
 
-        self.summary_ws.append_row([])
-        self.summary_ws.append_row(["Categoria", "Total BRL"])
         for category, value in summary.by_category_brl.items():
-            self.summary_ws.append_row([category, value])
+            rows.append([category, value])
 
-        self.summary_ws.append_row([])
-        self.summary_ws.append_row(["Pessoa", "Total BRL"])
+        rows.extend(
+            [
+                ["", ""],
+                ["Pessoa", "Total BRL"],
+            ]
+        )
+
         for person, value in summary.by_person_brl.items():
-            self.summary_ws.append_row([person, value])
+            rows.append([person, value])
+
+        self.summary_ws.clear()
+        self.summary_ws.update("A1", rows)

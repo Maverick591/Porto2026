@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import base64
+import io
 import json
-import tempfile
-import os
 from typing import Optional
 from openai import OpenAI
 
@@ -46,13 +45,16 @@ Regras:
 
 class ExpenseExtractor:
     def __init__(self) -> None:
-        if not settings.openai_api_key:
-            raise RuntimeError("OPENAI_API_KEY não configurada.")
-        self.client = OpenAI(api_key=settings.openai_api_key)
+        if not settings.minimax_api_key:
+            raise RuntimeError("MINIMAX_API_KEY não configurada.")
+        self.client = OpenAI(
+            api_key=settings.minimax_api_key,
+            base_url=settings.minimax_base_url,
+        )
 
     def parse_text(self, text: str) -> ParsedExpense:
         response = self.client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="MiniMax-M2.7",
             temperature=0,
             response_format={"type": "json_object"},
             messages=[
@@ -76,7 +78,7 @@ class ExpenseExtractor:
             prompt += f"\nContexto adicional do usuário: {hint}"
 
         response = self.client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="MiniMax-M2.7",
             temperature=0,
             response_format={"type": "json_object"},
             messages=[
@@ -94,20 +96,15 @@ class ExpenseExtractor:
         return ParsedExpense(**data)
 
     def transcribe_audio(self, file_bytes: bytes, filename: str = "audio.m4a") -> str:
-        suffix = "." + filename.split(".")[-1] if "." in filename else ".m4a"
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-            tmp.write(file_bytes)
-            tmp_path = tmp.name
+        if not settings.openai_api_key:
+            raise RuntimeError("OPENAI_API_KEY não configurada.")
 
-        try:
-            with open(tmp_path, "rb") as audio_file:
-                transcription = self.client.audio.transcriptions.create(
-                    model="gpt-4o-mini-transcribe",
-                    file=audio_file,
-                )
-            return transcription.text
-        finally:
-            try:
-                os.unlink(tmp_path)
-            except OSError:
-                pass
+        audio_client = OpenAI(api_key=settings.openai_api_key)
+        suffix = filename.split(".")[-1] if "." in filename else "m4a"
+        buffer = io.BytesIO(file_bytes)
+        buffer.name = filename if "." in filename else f"audio.{suffix}"  # type: ignore[attr-defined]
+        transcription = audio_client.audio.transcriptions.create(
+            model="gpt-4o-mini-transcribe",
+            file=buffer,
+        )
+        return transcription.text

@@ -43,6 +43,6 @@ records = [
 
 if __name__ == "__main__":
     store = SheetsStore()
-    for record in records:
-        store.append_expense(record)
+    store.append_expenses(records, refresh_summary=False)
+    store.refresh_summary()
     print(f"{len(records)} registros iniciais salvos.")
