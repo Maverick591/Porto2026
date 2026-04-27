@@ -611,7 +611,7 @@ def dashboard_html() -> str:
         setStatus("Dados sincronizados com sucesso.");
         setSyncState("Sincronização bem-sucedida.");
       } catch (error) {
-        setStatus("Falha ao carregar dados.");
+        setStatus(error?.message ? `Falha ao carregar dados: ${error.message}` : "Falha ao carregar dados.");
         setSyncState("Sincronização não concluída.");
       }
     }
@@ -641,7 +641,7 @@ def dashboard_html() -> str:
         setStatus("CSV exportado.");
         setSyncState("Sincronização bem-sucedida.");
       } catch (error) {
-        setStatus("Falha na exportação CSV.");
+        setStatus(error?.message ? `Falha na exportação CSV: ${error.message}` : "Falha na exportação CSV.");
         setSyncState("Sincronização não concluída.");
       }
     }
@@ -664,7 +664,7 @@ def dashboard_html() -> str:
         setSyncState("Sincronização bem-sucedida.");
         await loadData();
       } catch (error) {
-        setStatus("Erro ao salvar despesa de texto.");
+        setStatus(error?.message ? `Erro ao salvar despesa de texto: ${error.message}` : "Erro ao salvar despesa de texto.");
         setSyncState("Sincronização não concluída.");
       }
     }
@@ -692,7 +692,7 @@ def dashboard_html() -> str:
         setSyncState("Sincronização bem-sucedida.");
         await loadData();
       } catch (error) {
-        setStatus("Erro ao salvar foto/print.");
+        setStatus(error?.message ? `Erro ao salvar foto/print: ${error.message}` : "Erro ao salvar foto/print.");
         setSyncState("Sincronização não concluída.");
       }
     }
@@ -716,7 +716,7 @@ def dashboard_html() -> str:
         setSyncState("Sincronização bem-sucedida.");
         await loadData();
       } catch (error) {
-        setStatus("Erro ao salvar áudio.");
+        setStatus(error?.message ? `Erro ao salvar áudio: ${error.message}` : "Erro ao salvar áudio.");
         setSyncState("Sincronização não concluída.");
       }
     }
@@ -751,9 +751,12 @@ def health():
 
 @app.post("/expense/text", dependencies=[Depends(require_api_key)])
 def create_expense_from_text(payload: ExpenseInput):
-    parsed = get_extractor().parse_text(payload.text)
-    record = build_record(parsed, raw_text=payload.text, source="text")
-    get_store().append_expense(record)
+    try:
+        parsed = get_extractor().parse_text(payload.text)
+        record = build_record(parsed, raw_text=payload.text, source="text")
+        get_store().append_expense(record)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Falha ao salvar despesa de texto: {exc}")
     return {"saved": True, "expense": record}
 
 
@@ -776,6 +779,8 @@ async def create_expense_from_photo(
         parsed = get_extractor().parse_photo(content, mime_type=mime_type, hint=hint)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Falha ao salvar foto/print: {exc}")
 
     raw_text = f"Foto/print: {file.filename or ''}; dica={hint or ''}"
     record = build_record(
@@ -795,9 +800,12 @@ async def create_expense_from_audio(file: UploadFile = File(...)):
         transcript = get_extractor().transcribe_audio(content, filename=file.filename or "audio.m4a")
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
-    parsed = get_extractor().parse_text(transcript)
-    record = build_record(parsed, raw_text=transcript, source="audio")
-    get_store().append_expense(record)
+    try:
+        parsed = get_extractor().parse_text(transcript)
+        record = build_record(parsed, raw_text=transcript, source="audio")
+        get_store().append_expense(record)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Falha ao salvar áudio: {exc}")
     return {"saved": True, "transcript": transcript, "expense": record}
 
 

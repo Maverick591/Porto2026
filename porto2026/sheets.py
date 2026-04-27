@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import csv
 import io
+import json
+import tempfile
 from collections import defaultdict
 from datetime import datetime, date
 from itertools import zip_longest
+from pathlib import Path
 from typing import Any
 
 import gspread
@@ -46,10 +49,17 @@ class SheetsStore:
         if not settings.spreadsheet_id:
             raise RuntimeError("GOOGLE_SHEETS_SPREADSHEET_ID não configurado.")
 
-        credentials = Credentials.from_service_account_file(
-            settings.service_account_json,
-            scopes=SCOPES,
-        )
+        sa_json = settings.service_account_json
+        if sa_json.strip().startswith("{"):
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+                f.write(sa_json)
+                tmp_path = f.name
+            try:
+                credentials = Credentials.from_service_account_file(tmp_path, scopes=SCOPES)
+            finally:
+                Path(tmp_path).unlink(missing_ok=True)
+        else:
+            credentials = Credentials.from_service_account_file(sa_json, scopes=SCOPES)
         self.client = gspread.authorize(credentials)
         self.spreadsheet = self.client.open_by_key(settings.spreadsheet_id)
         self.expenses_ws = self._get_or_create("Despesas")
