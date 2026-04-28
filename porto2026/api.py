@@ -798,8 +798,9 @@ async def create_expense_from_audio(file: UploadFile = File(...)):
     content = await file.read()
     try:
         transcript = get_extractor().transcribe_audio(content, filename=file.filename or "audio.m4a")
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc))
+    except Exception as exc:
+        transcript = f"Áudio sem transcrição: {file.filename or 'arquivo enviado'}"
+
     try:
         parsed = get_extractor().parse_text(transcript)
         record = build_record(parsed, raw_text=transcript, source="audio")

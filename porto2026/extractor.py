@@ -3,11 +3,12 @@ from __future__ import annotations
 import base64
 import io
 import json
+import re
 from typing import Optional
 from openai import OpenAI
 
 from .config import settings
-from .models import ParsedExpense
+from .models import Currency, ExpenseCategory, ParsedExpense
 
 
 SYSTEM_PROMPT = """
@@ -51,19 +52,126 @@ class ExpenseExtractor:
             api_key=settings.minimax_api_key,
             base_url=settings.minimax_base_url,
         )
+        self.fallback_client = OpenAI(api_key=settings.openai_api_key) if settings.openai_api_key else None
 
-    def parse_text(self, text: str) -> ParsedExpense:
-        response = self.client.chat.completions.create(
-            model="MiniMax-M2.7",
+    @staticmethod
+    def _parse_response_content(content: str | None) -> ParsedExpense:
+        data = json.loads(content or "{}")
+        return ParsedExpense(**data)
+
+    def _chat_json(self, client: OpenAI, model: str, messages: list[dict[str, object]]) -> ParsedExpense:
+        response = client.chat.completions.create(
+            model=model,
             temperature=0,
             response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": text},
-            ],
+            messages=messages,
         )
-        data = json.loads(response.choices[0].message.content or "{}")
-        return ParsedExpense(**data)
+        return self._parse_response_content(response.choices[0].message.content)
+
+    @staticmethod
+    def _fallback_category(text: str) -> ExpenseCategory:
+        normalized = text.lower()
+        rules = [
+            (ExpenseCategory.PASSAGENS, ("voo", "avião", "passagem", "trem", "comboio", "latam", "tap", "ryanair", "uber")),
+            (ExpenseCategory.HOSPEDAGEM, ("hotel", "hosped", "airbnb", "hostel", "dorma", "essenzia", "alojamento")),
+            (ExpenseCategory.CONGRESSO, ("ehs", "congresso", "conference", "inscri", "gala", "reception", "welcome")),
+            (ExpenseCategory.CURSO, ("curso", "workshop", "pre-congresso", "pré-congresso", "robótica", "robotica")),
+            (ExpenseCategory.ALIMENTACAO, ("jantar", "almoço", "almoco", "café", "cafe", "restaurante", "bar", "mercado", "lanche")),
+            (ExpenseCategory.TRANSPORTE, ("metro", "metrô", "taxi", "táxi", "bolt", "uber", "bus", "ônibus", "autocarro")),
+            (ExpenseCategory.PASSEIO, ("douro", "passeio", "tour", "vinícola", "vinicola", "cruzeiro", "city tour")),
+            (ExpenseCategory.SEGURO, ("seguro",)),
+            (ExpenseCategory.COMPRAS, ("compr", "loja", "shopping", "market", "mercad", "souvenir")),
+        ]
+        for category, keywords in rules:
+            if any(keyword in normalized for keyword in keywords):
+                return category
+        return ExpenseCategory.NAO_CLASSIFICADO
+
+    @staticmethod
+    def _fallback_currency(text: str) -> Currency:
+        normalized = text.lower()
+        if "r$" in normalized or "real" in normalized or "reais" in normalized:
+            return Currency.BRL
+        if "$" in normalized or "usd" in normalized or "dólar" in normalized or "dolar" in normalized:
+            return Currency.USD
+        return Currency.EUR
+
+    @staticmethod
+    def _fallback_amount(text: str) -> float:
+        normalized = text.replace("\u00a0", " ")
+        matches = re.findall(r"(?<!\d)(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)(?!\d)", normalized)
+        if not matches:
+            return 0.0
+        raw = matches[0].replace(".", "").replace(",", ".")
+        try:
+            return float(raw)
+        except ValueError:
+            return 0.0
+
+    @staticmethod
+    def _fallback_person(text: str) -> str:
+        normalized = text.lower()
+        if "casal" in normalized:
+            return "Casal"
+        if "jocielle" in normalized and "solange" in normalized:
+            return "Jocielle/Solange"
+        if "jocielle" in normalized:
+            return "Jocielle"
+        if "solange" in normalized:
+            return "Solange"
+        return "Outro"
+
+    @staticmethod
+    def _fallback_payment_method(text: str) -> Optional[str]:
+        normalized = text.lower()
+        if "apple pay" in normalized:
+            return "Apple Pay"
+        if "cartão" in normalized or "cartao" in normalized or "card" in normalized:
+            return "Cartão"
+        if "pix" in normalized:
+            return "Pix"
+        if "dinheiro" in normalized or "cash" in normalized:
+            return "Dinheiro"
+        return None
+
+    @staticmethod
+    def _fallback_description(text: str) -> str:
+        cleaned = text.strip()
+        cleaned = re.sub(r"\b\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?\b", "", cleaned)
+        cleaned = re.sub(r"\b(euros?|eur|r\$|reais?|usd|dólares?|dolares?)\b", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\s+", " ", cleaned).strip(" -:;,")
+        return cleaned or "Despesa sem descrição"
+
+    def _fallback_parse_text(self, text: str) -> ParsedExpense:
+        amount = self._fallback_amount(text)
+        return ParsedExpense(
+            expense_date=None,
+            category=self._fallback_category(text),
+            description=self._fallback_description(text),
+            merchant=None,
+            person=self._fallback_person(text),
+            currency=self._fallback_currency(text),
+            amount_original=amount,
+            payment_method=self._fallback_payment_method(text),
+            status="Realizado",
+            confidence=0.35,
+            notes="Fallback local usado porque a IA não respondeu.",
+        )
+
+    def parse_text(self, text: str) -> ParsedExpense:
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": text},
+        ]
+        try:
+            return self._chat_json(self.client, "MiniMax-M2.7", messages)
+        except Exception:
+            if self.fallback_client is None:
+                return self._fallback_parse_text(text)
+            try:
+                return self._chat_json(self.fallback_client, "gpt-4o-mini", messages)
+            except Exception:
+                return self._fallback_parse_text(text)
 
     def parse_photo(self, file_bytes: bytes, mime_type: str, hint: Optional[str] = None) -> ParsedExpense:
         supported = {"image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"}
@@ -77,23 +185,25 @@ class ExpenseExtractor:
         if hint:
             prompt += f"\nContexto adicional do usuário: {hint}"
 
-        response = self.client.chat.completions.create(
-            model="MiniMax-M2.7",
-            temperature=0,
-            response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": prompt},
-                        {"type": "image_url", "image_url": {"url": data_url}},
-                    ],
-                },
-            ],
-        )
-        data = json.loads(response.choices[0].message.content or "{}")
-        return ParsedExpense(**data)
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {"type": "image_url", "image_url": {"url": data_url}},
+                ],
+            },
+        ]
+        try:
+            return self._chat_json(self.client, "MiniMax-M2.7", messages)
+        except Exception:
+            if self.fallback_client is None:
+                return self._fallback_parse_text(hint or "Comprovante em imagem")
+            try:
+                return self._chat_json(self.fallback_client, "gpt-4o-mini", messages)
+            except Exception:
+                return self._fallback_parse_text(hint or "Comprovante em imagem")
 
     def transcribe_audio(self, file_bytes: bytes, filename: str = "audio.m4a") -> str:
         if not settings.openai_api_key:
