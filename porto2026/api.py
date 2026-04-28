@@ -540,6 +540,14 @@ def dashboard_html() -> str:
       statusNode.textContent = message;
     }
 
+    function clearEntryForms() {
+      document.getElementById("textInput").value = "";
+      document.getElementById("photoForm").reset();
+      document.getElementById("audioForm").reset();
+      document.getElementById("photoAttachmentUrl").value = "";
+      document.getElementById("photoHint").value = "";
+    }
+
     function renderSummary(summary) {
       document.getElementById("totalBrl").textContent = Number(summary.total_brl || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
       document.getElementById("totalEur").textContent = Number(summary.total_eur_equivalent || 0).toLocaleString("pt-BR", { style: "currency", currency: "EUR" });
@@ -660,6 +668,7 @@ def dashboard_html() -> str:
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text }),
         });
+        clearEntryForms();
         setStatus("Despesa salva a partir do texto.");
         setSyncState("Sincronização bem-sucedida.");
         await loadData();
@@ -688,6 +697,7 @@ def dashboard_html() -> str:
           method: "POST",
           body: formData,
         });
+        clearEntryForms();
         setStatus("Foto/print enviado com sucesso.");
         setSyncState("Sincronização bem-sucedida.");
         await loadData();
@@ -712,6 +722,7 @@ def dashboard_html() -> str:
           method: "POST",
           body: formData,
         });
+        clearEntryForms();
         setStatus("Áudio enviado com sucesso.");
         setSyncState("Sincronização bem-sucedida.");
         await loadData();
