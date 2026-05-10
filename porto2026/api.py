@@ -567,6 +567,15 @@ def dashboard_html() -> str:
       gap: 16px;
     }
 
+    .launch-item {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mobile-launcher {
+      display: none;
+    }
+
     .side {
       grid-column: span 5;
       display: grid;
@@ -589,11 +598,36 @@ def dashboard_html() -> str:
       grid-column: span 12;
     }
 
+    .table-frame {
+      overflow: auto;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: rgba(4, 10, 19, 0.25);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      scrollbar-color: rgba(220, 180, 106, 0.38) rgba(255, 255, 255, 0.04);
+    }
+
+    .table-frame::-webkit-scrollbar {
+      height: 10px;
+      width: 10px;
+    }
+
+    .table-frame::-webkit-scrollbar-thumb {
+      background: rgba(220, 180, 106, 0.28);
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .table-frame::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
     table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
       overflow: hidden;
+      min-width: 760px;
     }
 
     body[data-theme="conservative"] table {
@@ -667,6 +701,96 @@ def dashboard_html() -> str:
       }
     }
 
+    @media (max-width: 760px) {
+      .grid {
+        display: grid;
+      }
+
+      .summary {
+        order: 2;
+      }
+
+      .forms {
+        order: 1;
+      }
+
+      .side {
+        order: 3;
+      }
+
+      .records {
+        order: 4;
+      }
+
+      .hero {
+        margin-bottom: 16px;
+      }
+
+      .pill-row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+        mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
+      }
+
+      .pill-row::-webkit-scrollbar {
+        display: none;
+      }
+
+      .mobile-launcher {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        padding: 8px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--line);
+        backdrop-filter: blur(12px);
+        position: sticky;
+        top: 10px;
+        z-index: 2;
+      }
+
+      .mobile-launcher button {
+        padding: 11px 10px;
+        border-radius: 12px;
+        font-size: 0.92rem;
+      }
+
+      .mobile-launcher button[data-active="true"] {
+        background: linear-gradient(135deg, rgba(220, 180, 106, 0.98), rgba(232, 201, 137, 0.98));
+        color: #09111f;
+        border-color: transparent;
+        box-shadow: 0 10px 24px rgba(220, 180, 106, 0.2);
+      }
+
+      .mobile-launcher button[data-active="false"] {
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text);
+      }
+
+      .launch-item[data-active="false"] {
+        display: none;
+      }
+
+      .launch-item[data-active="true"] {
+        display: grid;
+      }
+
+      .forms {
+        gap: 14px;
+      }
+
+      .hero-card.meta {
+        position: static;
+      }
+
+      .table-frame {
+        border-radius: 18px;
+      }
+    }
+
     @media (max-width: 640px) {
       .wrap {
         width: min(100% - 20px, 1200px);
@@ -680,6 +804,10 @@ def dashboard_html() -> str:
       .panel,
       .hero-card {
         padding: 18px;
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .actions button {
@@ -750,7 +878,13 @@ def dashboard_html() -> str:
       </div>
 
       <div class="panel forms">
-        <div class="stack">
+        <div class="mobile-launcher" role="tablist" aria-label="Atalhos de envio">
+          <button id="mobileTextTab" class="secondary" type="button" data-mobile-target="text" data-active="true">Texto</button>
+          <button id="mobilePhotoTab" class="secondary" type="button" data-mobile-target="photo">Foto/print</button>
+          <button id="mobileAudioTab" class="secondary" type="button" data-mobile-target="audio">Áudio</button>
+        </div>
+
+        <div class="launch-item" data-mobile-item="text" data-active="true">
           <h2 class="section-title">Lançamento por texto</h2>
           <form id="textForm" class="stack">
             <textarea id="textInput" placeholder="Ex.: Jantar no Porto 78 euros casal pago no cartão"></textarea>
@@ -758,7 +892,7 @@ def dashboard_html() -> str:
           </form>
         </div>
 
-        <div class="stack">
+        <div class="launch-item" data-mobile-item="photo" data-active="true">
           <h2 class="section-title">Lançamento por foto/print</h2>
           <form id="photoForm" class="stack">
             <div class="row">
@@ -770,7 +904,7 @@ def dashboard_html() -> str:
           </form>
         </div>
 
-        <div class="stack">
+        <div class="launch-item" data-mobile-item="audio" data-active="true">
           <h2 class="section-title">Lançamento por áudio</h2>
           <form id="audioForm" class="stack">
             <input id="audioFile" type="file" accept="audio/*" />
@@ -798,21 +932,23 @@ def dashboard_html() -> str:
       <div class="panel records">
         <h2 class="section-title">Últimas despesas</h2>
         <div class="spacer"></div>
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Categoria</th>
-              <th>Descrição</th>
-              <th>Pessoa</th>
-              <th>Moeda</th>
-              <th>Total BRL</th>
-            </tr>
-          </thead>
-          <tbody id="recordsBody">
-            <tr><td colspan="6" class="hint">Carregue os dados para ver o histórico mais recente.</td></tr>
-          </tbody>
-        </table>
+        <div class="table-frame">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Categoria</th>
+                <th>Descrição</th>
+                <th>Pessoa</th>
+                <th>Moeda</th>
+                <th>Total BRL</th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody">
+              <tr><td colspan="6" class="hint">Carregue os dados para ver o histórico mais recente.</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   </div>
@@ -826,6 +962,8 @@ def dashboard_html() -> str:
     const recordsBody = document.getElementById("recordsBody");
     const themePremiumButton = document.getElementById("themePremium");
     const themeConservativeButton = document.getElementById("themeConservative");
+    const mobileTabs = document.querySelectorAll("[data-mobile-target]");
+    const mobilePanels = document.querySelectorAll("[data-mobile-item]");
     const bodyNode = document.body;
 
     apiKeyInput.value = localStorage.getItem(storageKey) || "";
@@ -836,6 +974,17 @@ def dashboard_html() -> str:
       localStorage.setItem(storageTheme, normalized);
       themePremiumButton.dataset.active = String(normalized === "premium");
       themeConservativeButton.dataset.active = String(normalized === "conservative");
+    }
+
+    function applyMobilePanel(target) {
+      mobileTabs.forEach((button) => {
+        const active = button.dataset.mobileTarget === target;
+        button.dataset.active = String(active);
+      });
+      mobilePanels.forEach((panel) => {
+        const active = panel.dataset.mobileItem === target;
+        panel.dataset.active = String(active);
+      });
     }
 
     function activeKey() {
@@ -875,6 +1024,7 @@ def dashboard_html() -> str:
       document.getElementById("audioForm").reset();
       document.getElementById("photoAttachmentUrl").value = "";
       document.getElementById("photoHint").value = "";
+      applyMobilePanel("text");
     }
 
     function renderSummary(summary) {
@@ -1069,6 +1219,10 @@ def dashboard_html() -> str:
     document.getElementById("audioForm").addEventListener("submit", submitAudio);
     themePremiumButton.addEventListener("click", () => applyTheme("premium"));
     themeConservativeButton.addEventListener("click", () => applyTheme("conservative"));
+    mobileTabs.forEach((button) => {
+      button.addEventListener("click", () => applyMobilePanel(button.dataset.mobileTarget));
+    });
+    applyMobilePanel("text");
     applyTheme(localStorage.getItem(storageTheme) || "premium");
   </script>
 </body>
