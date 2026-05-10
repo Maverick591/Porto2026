@@ -716,7 +716,7 @@ def dashboard_html() -> str:
       </div>
       <div class="hero-card meta">
         <div class="field">
-          <label for="apiKey">API key</label>
+          <label for="apiKey">Senha de acesso</label>
           <input id="apiKey" type="password" placeholder="X-Porto2026-Key" autocomplete="off" />
         </div>
         <div class="field">
@@ -731,7 +731,7 @@ def dashboard_html() -> str:
           <button id="loadData" type="button">Carregar dados</button>
           <button id="exportCsv" class="secondary" type="button">Exportar CSV</button>
         </div>
-        <div class="status" id="status">Insira a chave para sincronizar com o Google Sheets.</div>
+        <div class="status" id="status">Insira a senha de acesso para sincronizar com o Google Sheets.</div>
         <div class="sync-state" id="syncState" data-tone="idle">Sincronização ainda não executada.</div>
       </div>
     </section>
@@ -784,7 +784,7 @@ def dashboard_html() -> str:
           <h2 class="section-title">Como funciona</h2>
           <p class="hint">
             A dashboard usa <code>fetch</code> para enviar <code>X-Porto2026-Key</code> ao backend.
-            O resumo, as últimas despesas e o CSV dependem da chave salva localmente no navegador.
+            A senha de acesso fica salva localmente no navegador.
           </p>
         </div>
         <div class="stack">
@@ -838,8 +838,12 @@ def dashboard_html() -> str:
       themeConservativeButton.dataset.active = String(normalized === "conservative");
     }
 
+    function activeKey() {
+      return (apiKeyInput.value || localStorage.getItem(storageKey) || "").trim();
+    }
+
     function apiHeaders(extra = {}) {
-      const key = (apiKeyInput.value || "").trim() || localStorage.getItem(storageKey) || "";
+      const key = activeKey();
       const headers = { ...extra };
       if (key) {
         headers["X-Porto2026-Key"] = key;
@@ -927,9 +931,9 @@ def dashboard_html() -> str:
 
     async function loadData() {
       saveKey();
-      const key = localStorage.getItem(storageKey) || "";
+      const key = activeKey();
       if (!key) {
-        setStatus("Insira a chave de API para carregar resumo e despesas.");
+        setStatus("Insira a senha de acesso para carregar resumo e despesas.");
         return;
       }
 
@@ -951,9 +955,9 @@ def dashboard_html() -> str:
 
     async function exportCsv() {
       saveKey();
-      const key = localStorage.getItem(storageKey) || "";
+      const key = activeKey();
       if (!key) {
-        setStatus("Insira a chave de API para exportar CSV.");
+        setStatus("Insira a senha de acesso para exportar CSV.");
         return;
       }
 

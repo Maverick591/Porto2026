@@ -755,7 +755,7 @@
         </div>
         <h1>Dashboard despesas EHS 2026</h1>
         <p class="lede">
-          Sincronize as despesas com sua API do Porto2026. Informe a URL base da API, a senha do app e use a dashboard sem sair do painel.
+          Sincronize as despesas com sua API do Porto2026. Informe a senha de acesso e use a dashboard sem sair do painel.
         </p>
         <div class="pill-row">
           <span class="pill">Texto, foto/print e áudio</span>
@@ -766,11 +766,7 @@
       </div>
       <div class="hero-card meta">
         <div class="field">
-          <label for="apiBase">API Base URL</label>
-          <input id="apiBase" type="url" placeholder="http://127.0.0.1:8000" autocomplete="off" />
-        </div>
-        <div class="field">
-          <label for="apiKey">API key</label>
+          <label for="apiKey">Senha de acesso</label>
           <input id="apiKey" type="password" placeholder="X-Porto2026-Key" autocomplete="off" />
         </div>
         <div class="field">
@@ -785,7 +781,7 @@
           <button id="loadData" type="button">Carregar dados</button>
           <button id="exportCsv" class="secondary" type="button">Exportar CSV</button>
         </div>
-        <div class="status" id="status" aria-live="polite">Configure a API base URL e a chave para sincronizar.</div>
+        <div class="status" id="status" aria-live="polite">Configure a senha de acesso para sincronizar.</div>
         <div class="sync-state" id="syncState" data-tone="idle" aria-live="polite">Sincronização ainda não executada.</div>
       </div>
     </section>
@@ -838,7 +834,7 @@
           <h2 class="section-title">Como funciona</h2>
           <p class="hint">
             A página usa <code>fetch</code> para falar com a sua API do Porto2026.
-            A URL base da API e a chave ficam salvas no navegador para facilitar as próximas sessões.
+            A senha de acesso fica salva no navegador e o backend é definido automaticamente.
           </p>
         </div>
         <div class="stack">
@@ -879,10 +875,8 @@
   </div>
 
   <script>
-    const storageBase = "porto2026PagesApiBaseUrl";
     const storageKey = "porto2026PagesApiKey";
     const storageTheme = "porto2026PagesTheme";
-    const apiBaseInput = document.getElementById("apiBase");
     const apiKeyInput = document.getElementById("apiKey");
     const statusNode = document.getElementById("status");
     const syncStateNode = document.getElementById("syncState");
@@ -892,11 +886,6 @@
     const bodyNode = document.body;
     let busyDepth = 0;
 
-    const localDefaultBase = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
-      ? "http://127.0.0.1:8000"
-      : "";
-
-    apiBaseInput.value = localStorage.getItem(storageBase) || localDefaultBase;
     apiKeyInput.value = localStorage.getItem(storageKey) || "";
 
     function applyTheme(theme) {
@@ -912,8 +901,7 @@
     }
 
     function apiBase() {
-      const saved = cleanBase(apiBaseInput.value || localStorage.getItem(storageBase) || "");
-      return saved || localDefaultBase;
+      return "https://porto2026-alpha.vercel.app";
     }
 
     function apiUrl(path) {
@@ -921,8 +909,12 @@
       return `${base}${path}`;
     }
 
+    function activeKey() {
+      return (apiKeyInput.value || localStorage.getItem(storageKey) || "").trim();
+    }
+
     function apiHeaders(extra = {}) {
-      const key = (apiKeyInput.value || "").trim() || localStorage.getItem(storageKey) || "";
+      const key = activeKey();
       const headers = { ...extra };
       if (key) {
         headers["X-Porto2026-Key"] = key;
@@ -931,9 +923,8 @@
     }
 
     function saveSettings() {
-      localStorage.setItem(storageBase, cleanBase(apiBaseInput.value));
       localStorage.setItem(storageKey, (apiKeyInput.value || "").trim());
-      statusNode.textContent = "Configurações salvas no navegador.";
+      statusNode.textContent = "Senha salva no navegador.";
     }
 
     function setStatus(message) {
@@ -1020,16 +1011,9 @@
 
     async function loadData() {
       saveSettings();
-      const key = localStorage.getItem(storageKey) || "";
+      const key = activeKey();
       if (!key) {
-        setStatus("Insira a chave de API para carregar resumo e despesas.");
-        setSyncState("Sincronização não concluída.");
-        return;
-      }
-
-      const base = apiBase();
-      if (!base) {
-        setStatus("Configure a API Base URL para sincronizar.");
+        setStatus("Insira a senha de acesso para carregar resumo e despesas.");
         setSyncState("Sincronização não concluída.");
         return;
       }
@@ -1056,13 +1040,6 @@
 
     async function exportCsv() {
       saveSettings();
-      const base = apiBase();
-      if (!base) {
-        setStatus("Configure a API Base URL para exportar CSV.");
-        setSyncState("Sincronização não concluída.");
-        return;
-      }
-
       setBusy(true);
       try {
         const response = await fetch(apiUrl("/export/csv"), { headers: apiHeaders() });
@@ -1092,14 +1069,8 @@
       event.preventDefault();
       saveSettings();
       const text = document.getElementById("textInput").value.trim();
-      const base = apiBase();
       if (!text) {
         setStatus("Digite um texto para salvar.");
-        return;
-      }
-      if (!base) {
-        setStatus("Configure a API Base URL para salvar despesa de texto.");
-        setSyncState("Sincronização não concluída.");
         return;
       }
       setBusy(true);
@@ -1124,14 +1095,8 @@
       event.preventDefault();
       saveSettings();
       const file = document.getElementById("photoFile").files[0];
-      const base = apiBase();
       if (!file) {
         setStatus("Escolha uma imagem para o comprovante.");
-        return;
-      }
-      if (!base) {
-        setStatus("Configure a API Base URL para salvar foto/print.");
-        setSyncState("Sincronização não concluída.");
         return;
       }
       const formData = new FormData();
@@ -1161,14 +1126,8 @@
       event.preventDefault();
       saveSettings();
       const file = document.getElementById("audioFile").files[0];
-      const base = apiBase();
       if (!file) {
         setStatus("Escolha um áudio para salvar.");
-        return;
-      }
-      if (!base) {
-        setStatus("Configure a API Base URL para salvar áudio.");
-        setSyncState("Sincronização não concluída.");
         return;
       }
       const formData = new FormData();
