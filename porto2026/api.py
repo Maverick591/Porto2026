@@ -123,77 +123,135 @@ def dashboard_html() -> str:
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dashboard despesas EHS 2026</title>
   <style>
+    @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@400;500;700;800&display=swap");
+
     :root {
-      --bg: #07111f;
-      --panel: rgba(11, 24, 43, 0.88);
-      --panel-strong: #0d1d34;
+      --bg: #050b15;
+      --panel: rgba(11, 24, 43, 0.9);
+      --panel-strong: rgba(9, 18, 33, 0.96);
       --line: rgba(147, 197, 253, 0.18);
-      --text: #e8f1ff;
-      --muted: #95a9c7;
+      --line-strong: rgba(255, 255, 255, 0.12);
+      --text: #eaf2ff;
+      --muted: #9badcb;
       --accent: #ffb703;
       --accent-2: #5eead4;
+      --success: #34d399;
       --danger: #fb7185;
       color-scheme: dark;
     }
 
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "Manrope", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
       background:
         radial-gradient(circle at top left, rgba(255, 183, 3, 0.18), transparent 28%),
         radial-gradient(circle at top right, rgba(94, 234, 212, 0.12), transparent 24%),
-        linear-gradient(160deg, #08111d 0%, #102542 100%);
+        radial-gradient(circle at 20% 85%, rgba(52, 211, 153, 0.08), transparent 24%),
+        linear-gradient(160deg, #07111d 0%, #102542 100%);
       min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      pointer-events: none;
+      z-index: -1;
+      border-radius: 999px;
+      filter: blur(24px);
+      opacity: 0.75;
+    }
+
+    body::before {
+      inset: -8rem auto auto -8rem;
+      width: 28rem;
+      height: 28rem;
+      background: radial-gradient(circle, rgba(255, 183, 3, 0.18), transparent 68%);
+    }
+
+    body::after {
+      inset: 10rem -6rem auto auto;
+      width: 24rem;
+      height: 24rem;
+      background: radial-gradient(circle, rgba(94, 234, 212, 0.14), transparent 68%);
     }
 
     .wrap {
       width: min(1200px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 28px 0 48px;
+      padding: 32px 0 56px;
     }
 
     .hero {
       display: grid;
       gap: 16px;
-      grid-template-columns: 1.5fr 1fr;
-      align-items: start;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr);
+      align-items: stretch;
       margin-bottom: 24px;
     }
 
-    .hero-card, .panel {
+    .hero-card,
+    .panel {
+      position: relative;
+      overflow: hidden;
       background: var(--panel);
-      backdrop-filter: blur(14px);
+      backdrop-filter: blur(16px);
       border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.24);
+      border-radius: 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+    }
+
+    .hero-card::before,
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 38%);
+      pointer-events: none;
     }
 
     .hero-card {
-      padding: 28px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 248px;
+    }
+
+    .meta {
+      padding: 24px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      background: linear-gradient(180deg, rgba(13, 29, 52, 0.95), rgba(9, 20, 38, 0.92));
     }
 
     h1 {
-      margin: 0 0 10px;
-      font-size: clamp(2rem, 4vw, 3.6rem);
-      line-height: 0.95;
-      letter-spacing: -0.05em;
+      margin: 14px 0 12px;
+      font-size: clamp(2.3rem, 5vw, 4.3rem);
+      line-height: 0.92;
+      letter-spacing: -0.07em;
+      font-weight: 800;
+      max-width: 10ch;
     }
 
     .lede {
       margin: 0;
       max-width: 62ch;
       color: var(--muted);
-      font-size: 1.02rem;
-      line-height: 1.6;
+      font-size: 1.03rem;
+      line-height: 1.7;
     }
 
     .pill-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 18px;
     }
 
     .pill {
@@ -202,64 +260,133 @@ def dashboard_html() -> str:
       gap: 8px;
       padding: 8px 12px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--line-strong);
       color: var(--text);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
+      white-space: nowrap;
     }
 
-    .meta {
-      padding: 24px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .meta .field {
+    .field {
       display: grid;
       gap: 6px;
     }
 
     label {
-      font-size: 0.88rem;
+      font-size: 0.86rem;
+      letter-spacing: 0.01em;
       color: var(--muted);
     }
 
-    input, textarea, button, select {
+    input,
+    textarea,
+    button,
+    select {
       font: inherit;
     }
 
-    input, textarea {
+    input,
+    textarea {
       width: 100%;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(7, 15, 29, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(5, 12, 24, 0.92);
       color: var(--text);
-      border-radius: 14px;
-      padding: 12px 14px;
+      border-radius: 16px;
+      padding: 14px 15px;
       outline: none;
+      transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
     }
 
-    textarea { min-height: 104px; resize: vertical; }
+    input::placeholder,
+    textarea::placeholder {
+      color: rgba(149, 169, 199, 0.68);
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: rgba(94, 234, 212, 0.42);
+      box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.12);
+      background: rgba(7, 15, 29, 0.98);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
 
     button {
       border: 0;
-      border-radius: 14px;
-      padding: 12px 16px;
-      font-weight: 700;
+      border-radius: 16px;
+      padding: 13px 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
       color: #09111f;
       background: linear-gradient(135deg, var(--accent), #ffd166);
       cursor: pointer;
+      box-shadow: 0 12px 30px rgba(255, 183, 3, 0.18);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+      box-shadow: 0 16px 34px rgba(255, 183, 3, 0.22);
+    }
+
+    button:active {
+      transform: translateY(0);
     }
 
     button.secondary {
       color: var(--text);
-      background: rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    button.secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status {
+      color: var(--accent-2);
+      font-size: 0.92rem;
+      min-height: 1.5em;
+    }
+
+    .sync-state {
+      padding: 13px 15px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: linear-gradient(180deg, rgba(7, 15, 29, 0.92), rgba(2, 8, 20, 0.78));
+      color: #d7e8ff;
+      min-height: 3rem;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .sync-state[data-tone="success"] {
+      border-color: rgba(52, 211, 153, 0.42);
+      color: #d9ffef;
+      background: linear-gradient(180deg, rgba(7, 22, 18, 0.92), rgba(3, 11, 10, 0.82));
+    }
+
+    .sync-state[data-tone="error"] {
+      border-color: rgba(251, 113, 133, 0.42);
+      color: #ffe3e8;
+      background: linear-gradient(180deg, rgba(39, 10, 17, 0.92), rgba(18, 4, 9, 0.82));
     }
 
     .grid {
       display: grid;
       gap: 16px;
-      grid-template-columns: repeat(12, 1fr);
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: start;
     }
 
     .panel {
@@ -278,28 +405,46 @@ def dashboard_html() -> str:
     }
 
     .card {
+      position: relative;
+      overflow: hidden;
       padding: 16px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      min-height: 102px;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: auto -20% -40% 55%;
+      width: 120px;
+      height: 120px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(94, 234, 212, 0.18), transparent 70%);
     }
 
     .card .k {
       display: block;
       color: var(--muted);
-      font-size: 0.86rem;
-      margin-bottom: 6px;
+      font-size: 0.84rem;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
     }
 
     .card .v {
-      font-size: 1.45rem;
+      display: block;
+      font-size: clamp(1.2rem, 2vw, 1.6rem);
       font-weight: 800;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.05em;
+      font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
     }
 
     .section-title {
       margin: 0 0 12px;
       font-size: 1.05rem;
+      letter-spacing: -0.03em;
     }
 
     .forms {
@@ -312,6 +457,7 @@ def dashboard_html() -> str:
       grid-column: span 5;
       display: grid;
       gap: 16px;
+      align-content: start;
     }
 
     .stack {
@@ -331,65 +477,95 @@ def dashboard_html() -> str:
 
     table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       overflow: hidden;
     }
 
-    th, td {
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: linear-gradient(180deg, rgba(10, 20, 37, 0.96), rgba(10, 20, 37, 0.88));
+      backdrop-filter: blur(10px);
+    }
+
+    th,
+    td {
       text-align: left;
-      padding: 12px 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 13px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       vertical-align: top;
+    }
+
+    tbody tr {
+      transition: background 0.18s ease;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
     }
 
     th {
       color: var(--muted);
-      font-size: 0.84rem;
+      font-size: 0.78rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .status {
-      color: var(--accent-2);
-      font-size: 0.92rem;
-      min-height: 1.5em;
-    }
-
-    .sync-state {
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.09);
-      background: rgba(2, 8, 20, 0.7);
-      color: #d7e8ff;
-      min-height: 3rem;
+      letter-spacing: 0.1em;
     }
 
     .hint {
       color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.5;
+      font-size: 0.92rem;
+      line-height: 1.55;
     }
 
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    .spacer {
+      height: 2px;
     }
-
-    .spacer { height: 2px; }
 
     @media (max-width: 980px) {
-      .hero, .forms, .side, .summary, .records { grid-column: span 12; }
-      .hero { grid-template-columns: 1fr; }
-      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .grid { grid-template-columns: 1fr; }
-      .forms, .side { grid-column: auto; }
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .summary,
+      .records,
+      .forms,
+      .side {
+        grid-column: span 12;
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .hero-card {
+        min-height: auto;
+      }
     }
 
     @media (max-width: 640px) {
-      .wrap { width: min(100% - 20px, 1200px); }
-      .cards, .row { grid-template-columns: 1fr; }
-      .panel, .hero-card { padding: 18px; }
+      .wrap {
+        width: min(100% - 20px, 1200px);
+      }
+
+      .cards,
+      .row {
+        grid-template-columns: 1fr;
+      }
+
+      .panel,
+      .hero-card {
+        padding: 18px;
+      }
+
+      .actions button {
+        flex: 1 1 100%;
+      }
+
+      h1 {
+        max-width: none;
+      }
     }
   </style>
 </head>
@@ -400,8 +576,8 @@ def dashboard_html() -> str:
         <div class="pill-row">
           <span class="pill">Porto2026</span>
           <span class="pill">Google Sheets</span>
-          <span class="pill">Auth via X-Porto2026-Key</span>
-          <span class="pill">EUR/BRL @ __DEFAULT_RATE__</span>
+          <span class="pill">Texto, foto e áudio</span>
+          <span class="pill">Chave protegida</span>
         </div>
         <h1>Dashboard despesas EHS 2026</h1>
         <p class="lede">
@@ -426,7 +602,7 @@ def dashboard_html() -> str:
           <button id="exportCsv" class="secondary" type="button">Exportar CSV</button>
         </div>
         <div class="status" id="status">Insira a chave para sincronizar com o Google Sheets.</div>
-        <div class="sync-state" id="syncState">Sincronização ainda não executada.</div>
+        <div class="sync-state" id="syncState" data-tone="idle">Sincronização ainda não executada.</div>
       </div>
     </section>
 
@@ -475,7 +651,7 @@ def dashboard_html() -> str:
         <div class="stack">
           <h2 class="section-title">Como funciona</h2>
           <p class="hint">
-            A dashboard usa fetch para enviar `X-Porto2026-Key` ao backend.
+            A dashboard usa <code>fetch</code> para enviar <code>X-Porto2026-Key</code> ao backend.
             O resumo, as últimas despesas e o CSV dependem da chave salva localmente no navegador.
           </p>
         </div>
@@ -534,6 +710,11 @@ def dashboard_html() -> str:
 
     function setSyncState(message) {
       syncStateNode.textContent = message;
+      syncStateNode.dataset.tone = message.includes("bem-sucedida")
+        ? "success"
+        : message.includes("não concluída")
+          ? "error"
+          : "idle";
     }
 
     function setStatus(message) {
