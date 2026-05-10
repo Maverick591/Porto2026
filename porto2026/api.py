@@ -140,6 +140,20 @@ def dashboard_html() -> str:
       color-scheme: dark;
     }
 
+    body[data-theme="conservative"] {
+      --bg: #071019;
+      --panel: rgba(12, 21, 36, 0.92);
+      --panel-strong: rgba(9, 16, 29, 0.96);
+      --line: rgba(173, 188, 214, 0.14);
+      --line-strong: rgba(255, 255, 255, 0.08);
+      --text: #edf3fb;
+      --muted: #a1afc5;
+      --accent: #e2b14f;
+      --accent-2: #7dd7cc;
+      --success: #40c98a;
+      --danger: #f27f91;
+    }
+
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
@@ -154,6 +168,13 @@ def dashboard_html() -> str:
       min-height: 100vh;
       position: relative;
       overflow-x: hidden;
+    }
+
+    body[data-theme="conservative"] {
+      background:
+        radial-gradient(circle at top left, rgba(226, 177, 79, 0.12), transparent 26%),
+        radial-gradient(circle at top right, rgba(125, 215, 204, 0.08), transparent 24%),
+        linear-gradient(180deg, #08111a 0%, #0f1d31 100%);
     }
 
     body::before,
@@ -174,11 +195,19 @@ def dashboard_html() -> str:
       background: radial-gradient(circle, rgba(255, 183, 3, 0.18), transparent 68%);
     }
 
+    body[data-theme="conservative"]::before {
+      background: radial-gradient(circle, rgba(226, 177, 79, 0.12), transparent 68%);
+    }
+
     body::after {
       inset: 10rem -6rem auto auto;
       width: 24rem;
       height: 24rem;
       background: radial-gradient(circle, rgba(94, 234, 212, 0.14), transparent 68%);
+    }
+
+    body[data-theme="conservative"]::after {
+      background: radial-gradient(circle, rgba(125, 215, 204, 0.08), transparent 68%);
     }
 
     .wrap {
@@ -206,6 +235,12 @@ def dashboard_html() -> str:
       box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
     }
 
+    body[data-theme="conservative"] .hero-card,
+    body[data-theme="conservative"] .panel {
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+      border-radius: 22px;
+    }
+
     .hero-card::before,
     .panel::before {
       content: "";
@@ -213,6 +248,11 @@ def dashboard_html() -> str:
       inset: 0;
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 38%);
       pointer-events: none;
+    }
+
+    body[data-theme="conservative"] .hero-card::before,
+    body[data-theme="conservative"] .panel::before {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 45%);
     }
 
     .hero-card {
@@ -231,6 +271,10 @@ def dashboard_html() -> str:
       background: linear-gradient(180deg, rgba(13, 29, 52, 0.95), rgba(9, 20, 38, 0.92));
     }
 
+    body[data-theme="conservative"] .meta {
+      background: linear-gradient(180deg, rgba(15, 26, 42, 0.96), rgba(8, 16, 28, 0.94));
+    }
+
     h1 {
       margin: 14px 0 12px;
       font-size: clamp(2.3rem, 5vw, 4.3rem);
@@ -240,12 +284,23 @@ def dashboard_html() -> str:
       max-width: 10ch;
     }
 
+    body[data-theme="conservative"] h1 {
+      max-width: 11ch;
+      letter-spacing: -0.06em;
+      font-size: clamp(2.1rem, 4.4vw, 3.8rem);
+    }
+
     .lede {
       margin: 0;
       max-width: 62ch;
       color: var(--muted);
       font-size: 1.03rem;
       line-height: 1.7;
+    }
+
+    body[data-theme="conservative"] .lede {
+      font-size: 1rem;
+      line-height: 1.75;
     }
 
     .pill-row {
@@ -265,6 +320,10 @@ def dashboard_html() -> str:
       color: var(--text);
       font-size: 0.88rem;
       white-space: nowrap;
+    }
+
+    body[data-theme="conservative"] .pill {
+      background: rgba(255, 255, 255, 0.035);
     }
 
     .field {
@@ -354,6 +413,35 @@ def dashboard_html() -> str:
       flex-wrap: wrap;
     }
 
+    .segmented {
+      display: inline-grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      padding: 6px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--line);
+    }
+
+    .segmented button {
+      padding: 10px 14px;
+      border-radius: 12px;
+      box-shadow: none;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .segmented button.secondary {
+      background: transparent;
+      border-color: transparent;
+      color: var(--muted);
+    }
+
+    .segmented button.secondary[data-active="true"] {
+      background: linear-gradient(135deg, rgba(255, 183, 3, 0.95), rgba(255, 209, 102, 0.95));
+      color: #09111f;
+    }
+
     .status {
       color: var(--accent-2);
       font-size: 0.92rem;
@@ -397,6 +485,14 @@ def dashboard_html() -> str:
       grid-column: span 12;
     }
 
+    .summary-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
     .cards {
       display: grid;
       gap: 12px;
@@ -414,6 +510,11 @@ def dashboard_html() -> str:
       min-height: 102px;
     }
 
+    body[data-theme="conservative"] .card {
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+    }
+
     .card::after {
       content: "";
       position: absolute;
@@ -422,6 +523,10 @@ def dashboard_html() -> str:
       height: 120px;
       border-radius: 999px;
       background: radial-gradient(circle, rgba(94, 234, 212, 0.18), transparent 70%);
+    }
+
+    body[data-theme="conservative"] .card::after {
+      background: radial-gradient(circle, rgba(125, 215, 204, 0.12), transparent 70%);
     }
 
     .card .k {
@@ -441,10 +546,19 @@ def dashboard_html() -> str:
       font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
     }
 
+    body[data-theme="conservative"] .card .v {
+      font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    }
+
     .section-title {
       margin: 0 0 12px;
       font-size: 1.05rem;
       letter-spacing: -0.03em;
+    }
+
+    body[data-theme="conservative"] .section-title {
+      font-size: 1rem;
+      letter-spacing: -0.02em;
     }
 
     .forms {
@@ -482,6 +596,11 @@ def dashboard_html() -> str:
       overflow: hidden;
     }
 
+    body[data-theme="conservative"] table {
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+    }
+
     thead th {
       position: sticky;
       top: 0;
@@ -511,6 +630,10 @@ def dashboard_html() -> str:
       font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
+    }
+
+    body[data-theme="conservative"] th {
+      font-size: 0.76rem;
     }
 
     .hint {
@@ -569,7 +692,7 @@ def dashboard_html() -> str:
     }
   </style>
 </head>
-<body>
+<body data-theme="premium">
   <div class="wrap">
     <section class="hero">
       <div class="hero-card">
@@ -596,6 +719,13 @@ def dashboard_html() -> str:
           <label for="apiKey">API key</label>
           <input id="apiKey" type="password" placeholder="X-Porto2026-Key" autocomplete="off" />
         </div>
+        <div class="field">
+          <label>Estilo visual</label>
+          <div class="segmented" role="tablist" aria-label="Estilo visual">
+            <button id="themePremium" class="secondary" type="button" data-active="true">Premium</button>
+            <button id="themeConservative" class="secondary" type="button">Conservador</button>
+          </div>
+        </div>
         <div class="actions">
           <button id="saveKey" class="secondary" type="button">Salvar chave</button>
           <button id="loadData" type="button">Carregar dados</button>
@@ -608,7 +738,9 @@ def dashboard_html() -> str:
 
     <section class="grid">
       <div class="panel summary">
-        <h2 class="section-title">Resumo</h2>
+        <div class="summary-head">
+          <h2 class="section-title">Resumo</h2>
+        </div>
         <div class="cards">
           <div class="card"><span class="k">Total BRL</span><span class="v" id="totalBrl">-</span></div>
           <div class="card"><span class="k">Equivalente EUR</span><span class="v" id="totalEur">-</span></div>
@@ -687,12 +819,24 @@ def dashboard_html() -> str:
 
   <script>
     const storageKey = "porto2026ApiKey";
+    const storageTheme = "porto2026DashboardTheme";
     const apiKeyInput = document.getElementById("apiKey");
     const statusNode = document.getElementById("status");
     const syncStateNode = document.getElementById("syncState");
     const recordsBody = document.getElementById("recordsBody");
+    const themePremiumButton = document.getElementById("themePremium");
+    const themeConservativeButton = document.getElementById("themeConservative");
+    const bodyNode = document.body;
 
     apiKeyInput.value = localStorage.getItem(storageKey) || "";
+
+    function applyTheme(theme) {
+      const normalized = theme === "conservative" ? "conservative" : "premium";
+      bodyNode.dataset.theme = normalized;
+      localStorage.setItem(storageTheme, normalized);
+      themePremiumButton.dataset.active = String(normalized === "premium");
+      themeConservativeButton.dataset.active = String(normalized === "conservative");
+    }
 
     function apiHeaders(extra = {}) {
       const key = (apiKeyInput.value || "").trim() || localStorage.getItem(storageKey) || "";
@@ -919,6 +1063,9 @@ def dashboard_html() -> str:
     document.getElementById("textForm").addEventListener("submit", submitText);
     document.getElementById("photoForm").addEventListener("submit", submitPhoto);
     document.getElementById("audioForm").addEventListener("submit", submitAudio);
+    themePremiumButton.addEventListener("click", () => applyTheme("premium"));
+    themeConservativeButton.addEventListener("click", () => applyTheme("conservative"));
+    applyTheme(localStorage.getItem(storageTheme) || "premium");
   </script>
 </body>
 </html>
