@@ -5,58 +5,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dashboard despesas EHS 2026</title>
   <style>
-    @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@400;500;700;800&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@400;500;600;700;800&display=swap");
 
     :root {
-      --bg: #050b15;
-      --panel: rgba(11, 24, 43, 0.9);
-      --panel-strong: rgba(9, 18, 33, 0.96);
-      --line: rgba(147, 197, 253, 0.18);
-      --line-strong: rgba(255, 255, 255, 0.12);
-      --text: #eaf2ff;
-      --muted: #9badcb;
-      --accent: #ffb703;
-      --accent-2: #5eead4;
-      --success: #34d399;
-      --danger: #fb7185;
+      --bg: #07101c;
+      --bg-soft: #0b1728;
+      --panel: rgba(13, 23, 39, 0.84);
+      --panel-strong: rgba(8, 15, 28, 0.96);
+      --panel-solid: #0d1726;
+      --line: rgba(171, 188, 214, 0.14);
+      --line-strong: rgba(255, 255, 255, 0.1);
+      --text: #edf4ff;
+      --muted: #9bacbf;
+      --accent: #dcb46a;
+      --accent-2: #80d4c1;
+      --accent-3: #7ea8ff;
+      --success: #38d39d;
+      --danger: #ff7c92;
+      --shadow-lg: 0 36px 90px rgba(1, 6, 15, 0.42);
+      --shadow-md: 0 18px 40px rgba(1, 6, 15, 0.26);
       color-scheme: dark;
     }
 
     body[data-theme="conservative"] {
-      --bg: #071019;
-      --panel: rgba(12, 21, 36, 0.92);
-      --panel-strong: rgba(9, 16, 29, 0.96);
-      --line: rgba(173, 188, 214, 0.14);
-      --line-strong: rgba(255, 255, 255, 0.08);
-      --text: #edf3fb;
-      --muted: #a1afc5;
-      --accent: #e2b14f;
-      --accent-2: #7dd7cc;
-      --success: #40c98a;
-      --danger: #f27f91;
+      --bg: #08111a;
+      --bg-soft: #0d1724;
+      --panel: rgba(12, 18, 29, 0.9);
+      --panel-strong: rgba(8, 13, 22, 0.97);
+      --panel-solid: #0c1320;
+      --line: rgba(194, 205, 223, 0.11);
+      --line-strong: rgba(255, 255, 255, 0.07);
+      --text: #f1f5fa;
+      --muted: #a4afbf;
+      --accent: #d8b47b;
+      --accent-2: #8bc9bf;
+      --accent-3: #90a8cf;
+      --success: #4fd09a;
+      --danger: #ef8b9e;
+      --shadow-lg: 0 26px 60px rgba(1, 5, 12, 0.34);
+      --shadow-md: 0 16px 34px rgba(1, 5, 12, 0.2);
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
+    ::selection {
+      background: rgba(220, 180, 106, 0.22);
+      color: var(--text);
+    }
     body {
       margin: 0;
       font-family: "Manrope", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at top left, rgba(255, 183, 3, 0.18), transparent 28%),
-        radial-gradient(circle at top right, rgba(94, 234, 212, 0.12), transparent 24%),
-        radial-gradient(circle at 20% 85%, rgba(52, 211, 153, 0.08), transparent 24%),
-        linear-gradient(160deg, #07111d 0%, #102542 100%);
+        radial-gradient(circle at 12% 0%, rgba(220, 180, 106, 0.16), transparent 24%),
+        radial-gradient(circle at 88% 2%, rgba(126, 168, 255, 0.12), transparent 22%),
+        radial-gradient(circle at 18% 84%, rgba(128, 212, 193, 0.12), transparent 22%),
+        linear-gradient(180deg, #07101a 0%, #0b1727 46%, #07101a 100%);
       min-height: 100vh;
       position: relative;
       overflow-x: hidden;
+      text-rendering: geometricPrecision;
     }
 
     body[data-theme="conservative"] {
       background:
-        radial-gradient(circle at top left, rgba(226, 177, 79, 0.12), transparent 26%),
-        radial-gradient(circle at top right, rgba(125, 215, 204, 0.08), transparent 24%),
-        linear-gradient(180deg, #08111a 0%, #0f1d31 100%);
+        radial-gradient(circle at 12% 0%, rgba(216, 180, 123, 0.12), transparent 22%),
+        radial-gradient(circle at 88% 2%, rgba(144, 168, 207, 0.08), transparent 20%),
+        linear-gradient(180deg, #081019 0%, #0e1723 48%, #081019 100%);
     }
 
     body::before,
@@ -71,39 +86,39 @@
     }
 
     body::before {
-      inset: -8rem auto auto -8rem;
-      width: 28rem;
-      height: 28rem;
-      background: radial-gradient(circle, rgba(255, 183, 3, 0.18), transparent 68%);
+      inset: -10rem auto auto -10rem;
+      width: 30rem;
+      height: 30rem;
+      background: radial-gradient(circle, rgba(220, 180, 106, 0.14), transparent 68%);
     }
 
     body[data-theme="conservative"]::before {
-      background: radial-gradient(circle, rgba(226, 177, 79, 0.12), transparent 68%);
+      background: radial-gradient(circle, rgba(216, 180, 123, 0.1), transparent 68%);
     }
 
     body::after {
       inset: 10rem -6rem auto auto;
-      width: 24rem;
-      height: 24rem;
-      background: radial-gradient(circle, rgba(94, 234, 212, 0.14), transparent 68%);
+      width: 26rem;
+      height: 26rem;
+      background: radial-gradient(circle, rgba(126, 168, 255, 0.12), transparent 68%);
     }
 
     body[data-theme="conservative"]::after {
-      background: radial-gradient(circle, rgba(125, 215, 204, 0.08), transparent 68%);
+      background: radial-gradient(circle, rgba(144, 168, 207, 0.08), transparent 68%);
     }
 
     .wrap {
-      width: min(1200px, calc(100% - 32px));
+      width: min(1320px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 32px 0 56px;
+      padding: 28px 0 56px;
     }
 
     .hero {
       display: grid;
-      gap: 16px;
-      grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr);
+      gap: 18px;
+      grid-template-columns: minmax(0, 1.62fr) minmax(320px, 0.68fr);
       align-items: stretch;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .hero-card,
@@ -111,16 +126,16 @@
       position: relative;
       overflow: hidden;
       background: var(--panel);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(18px) saturate(130%);
       border: 1px solid var(--line);
       border-radius: 28px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+      box-shadow: var(--shadow-lg);
     }
 
     body[data-theme="conservative"] .hero-card,
     body[data-theme="conservative"] .panel {
-      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
-      border-radius: 22px;
+      box-shadow: var(--shadow-md);
+      border-radius: 24px;
     }
 
     .hero-card::before,
@@ -128,61 +143,68 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 38%);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 24%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02), transparent 14%);
       pointer-events: none;
     }
 
     body[data-theme="conservative"] .hero-card::before,
     body[data-theme="conservative"] .panel::before {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 45%);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 42%);
     }
 
     .hero-card {
-      padding: 30px;
+      padding: 34px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 248px;
+      min-height: 276px;
     }
 
     .meta {
-      padding: 24px;
+      padding: 26px;
       display: grid;
-      gap: 14px;
+      gap: 15px;
       align-content: start;
-      background: linear-gradient(180deg, rgba(13, 29, 52, 0.95), rgba(9, 20, 38, 0.92));
+      background:
+        linear-gradient(180deg, rgba(12, 19, 32, 0.94), rgba(8, 15, 27, 0.92));
     }
 
     body[data-theme="conservative"] .meta {
-      background: linear-gradient(180deg, rgba(15, 26, 42, 0.96), rgba(8, 16, 28, 0.94));
+      background: linear-gradient(180deg, rgba(14, 20, 32, 0.95), rgba(8, 14, 23, 0.95));
     }
 
     h1 {
       margin: 14px 0 12px;
-      font-size: clamp(2.3rem, 5vw, 4.3rem);
+      font-size: clamp(2.05rem, 4.2vw, 4.15rem);
       line-height: 0.92;
       letter-spacing: -0.07em;
-      font-weight: 800;
-      max-width: 10ch;
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      font-variation-settings: "SOFT" 12, "WONK" 0;
+      max-width: none;
+      white-space: nowrap;
     }
 
     body[data-theme="conservative"] h1 {
-      max-width: 11ch;
-      letter-spacing: -0.06em;
-      font-size: clamp(2.1rem, 4.4vw, 3.8rem);
+      max-width: none;
+      font-size: clamp(1.95rem, 3.7vw, 3.55rem);
+      letter-spacing: -0.05em;
+      white-space: nowrap;
     }
 
     .lede {
       margin: 0;
-      max-width: 62ch;
+      max-width: 60ch;
       color: var(--muted);
-      font-size: 1.03rem;
-      line-height: 1.7;
+      font-size: 1.02rem;
+      line-height: 1.75;
     }
 
     body[data-theme="conservative"] .lede {
-      font-size: 1rem;
-      line-height: 1.75;
+      font-size: 0.99rem;
+      line-height: 1.72;
     }
 
     .pill-row {
@@ -195,13 +217,15 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 12px;
+      padding: 9px 13px;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--line-strong);
       color: var(--text);
-      font-size: 0.88rem;
+      font-size: 0.86rem;
+      letter-spacing: 0.01em;
       white-space: nowrap;
+      backdrop-filter: blur(10px);
     }
 
     body[data-theme="conservative"] .pill {
@@ -210,12 +234,13 @@
 
     .field {
       display: grid;
-      gap: 6px;
+      gap: 8px;
     }
 
     label {
-      font-size: 0.86rem;
-      letter-spacing: 0.01em;
+      font-size: 0.81rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       color: var(--muted);
     }
 
@@ -229,13 +254,19 @@
     input,
     textarea {
       width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(5, 12, 24, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background:
+        linear-gradient(180deg, rgba(8, 14, 24, 0.98), rgba(6, 11, 20, 0.96));
       color: var(--text);
       border-radius: 16px;
       padding: 14px 15px;
       outline: none;
-      transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      transition:
+        border-color 0.18s ease,
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease,
+        opacity 0.18s ease;
     }
 
     input::placeholder,
@@ -243,11 +274,25 @@
       color: rgba(149, 169, 199, 0.68);
     }
 
+    input:hover,
+    textarea:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
     input:focus,
-    textarea:focus {
-      border-color: rgba(94, 234, 212, 0.42);
-      box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.12);
-      background: rgba(7, 15, 29, 0.98);
+    textarea:focus,
+    button:focus,
+    .segmented button:focus {
+      outline: none;
+    }
+
+    input:focus-visible,
+    textarea:focus-visible {
+      border-color: rgba(220, 180, 106, 0.5);
+      box-shadow:
+        0 0 0 4px rgba(220, 180, 106, 0.12),
+        0 12px 28px rgba(0, 0, 0, 0.18);
+      background: rgba(7, 13, 22, 0.99);
     }
 
     textarea {
@@ -259,23 +304,28 @@
       border: 0;
       border-radius: 16px;
       padding: 13px 18px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
+      font-weight: 700;
+      letter-spacing: -0.01em;
       color: #09111f;
-      background: linear-gradient(135deg, var(--accent), #ffd166);
+      background: linear-gradient(135deg, var(--accent), #e8c989);
       cursor: pointer;
-      box-shadow: 0 12px 30px rgba(255, 183, 3, 0.18);
-      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+      box-shadow: 0 12px 30px rgba(220, 180, 106, 0.2);
+      transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        filter 0.18s ease,
+        opacity 0.18s ease,
+        background 0.18s ease;
     }
 
     button:hover {
       transform: translateY(-1px);
-      filter: brightness(1.03);
-      box-shadow: 0 16px 34px rgba(255, 183, 3, 0.22);
+      filter: brightness(1.02) saturate(1.02);
+      box-shadow: 0 18px 40px rgba(220, 180, 106, 0.24);
     }
 
     button:active {
-      transform: translateY(0);
+      transform: translateY(0) scale(0.99);
     }
 
     button.secondary {
@@ -287,6 +337,7 @@
 
     button.secondary:hover {
       background: rgba(255, 255, 255, 0.08);
+      box-shadow: none;
     }
 
     .actions {
@@ -320,14 +371,17 @@
     }
 
     .segmented button.secondary[data-active="true"] {
-      background: linear-gradient(135deg, rgba(255, 183, 3, 0.95), rgba(255, 209, 102, 0.95));
+      background: linear-gradient(135deg, rgba(220, 180, 106, 0.98), rgba(232, 201, 137, 0.98));
       color: #09111f;
+      border-color: transparent;
+      box-shadow: 0 10px 24px rgba(220, 180, 106, 0.2);
     }
 
     .status {
       color: var(--accent-2);
       font-size: 0.92rem;
       min-height: 1.5em;
+      line-height: 1.5;
     }
 
     .sync-state {
@@ -337,7 +391,9 @@
       background: linear-gradient(180deg, rgba(7, 15, 29, 0.92), rgba(2, 8, 20, 0.78));
       color: #d7e8ff;
       min-height: 3rem;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 14px 30px rgba(0, 0, 0, 0.12);
     }
 
     .sync-state[data-tone="success"] {
@@ -352,15 +408,23 @@
       background: linear-gradient(180deg, rgba(39, 10, 17, 0.92), rgba(18, 4, 9, 0.82));
     }
 
+    .sync-state[data-tone="loading"] {
+      border-color: rgba(126, 168, 255, 0.34);
+      background:
+        linear-gradient(135deg, rgba(18, 31, 53, 0.95), rgba(7, 14, 26, 0.9)),
+        linear-gradient(90deg, rgba(126, 168, 255, 0.14), transparent);
+      animation: loadingPulse 1.8s ease-in-out infinite;
+    }
+
     .grid {
       display: grid;
-      gap: 16px;
+      gap: 18px;
       grid-template-columns: repeat(12, minmax(0, 1fr));
       align-items: start;
     }
 
     .panel {
-      padding: 20px;
+      padding: 22px;
     }
 
     .summary {
@@ -379,7 +443,7 @@
       display: grid;
       gap: 12px;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      margin-top: 14px;
+      margin-top: 16px;
     }
 
     .card {
@@ -387,9 +451,23 @@
       overflow: hidden;
       padding: 16px;
       border-radius: 20px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)),
+        linear-gradient(180deg, rgba(5, 11, 20, 0.78), rgba(10, 16, 29, 0.55));
       border: 1px solid rgba(255, 255, 255, 0.09);
-      min-height: 102px;
+      min-height: 112px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 12px 28px rgba(0, 0, 0, 0.12);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(220, 180, 106, 0.18);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 18px 36px rgba(0, 0, 0, 0.15);
     }
 
     body[data-theme="conservative"] .card {
@@ -404,43 +482,50 @@
       width: 120px;
       height: 120px;
       border-radius: 999px;
-      background: radial-gradient(circle, rgba(94, 234, 212, 0.18), transparent 70%);
+      background: radial-gradient(circle, rgba(126, 168, 255, 0.16), transparent 70%);
     }
 
     body[data-theme="conservative"] .card::after {
-      background: radial-gradient(circle, rgba(125, 215, 204, 0.12), transparent 70%);
+      background: radial-gradient(circle, rgba(144, 168, 207, 0.12), transparent 70%);
     }
 
     .card .k {
       display: block;
       color: var(--muted);
-      font-size: 0.84rem;
+      font-size: 0.79rem;
       margin-bottom: 8px;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
     }
 
     .card .v {
       display: block;
-      font-size: clamp(1.2rem, 2vw, 1.6rem);
+      font-size: clamp(1.24rem, 2vw, 1.68rem);
       font-weight: 800;
       letter-spacing: -0.05em;
+      font-variant-numeric: tabular-nums;
       font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
     }
 
     body[data-theme="conservative"] .card .v {
       font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+      font-variant-numeric: tabular-nums;
     }
 
     .section-title {
       margin: 0 0 12px;
-      font-size: 1.05rem;
-      letter-spacing: -0.03em;
+      font-size: 0.86rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
     }
 
     body[data-theme="conservative"] .section-title {
-      font-size: 1rem;
-      letter-spacing: -0.02em;
+      font-size: 0.83rem;
+      letter-spacing: 0.13em;
     }
 
     .forms {
@@ -471,11 +556,37 @@
       grid-column: span 12;
     }
 
+    .table-frame {
+      overflow: auto;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: rgba(4, 10, 19, 0.25);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      scrollbar-color: rgba(220, 180, 106, 0.38) rgba(255, 255, 255, 0.04);
+    }
+
+    .table-frame::-webkit-scrollbar {
+      height: 10px;
+      width: 10px;
+    }
+
+    .table-frame::-webkit-scrollbar-thumb {
+      background: rgba(220, 180, 106, 0.28);
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .table-frame::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
     table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
       overflow: hidden;
+      min-width: 760px;
+      background: rgba(7, 12, 21, 0.2);
     }
 
     body[data-theme="conservative"] table {
@@ -488,44 +599,88 @@
       top: 0;
       z-index: 1;
       background: linear-gradient(180deg, rgba(10, 20, 37, 0.96), rgba(10, 20, 37, 0.88));
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
     }
 
     th,
     td {
       text-align: left;
-      padding: 13px 10px;
+      padding: 14px 12px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       vertical-align: top;
     }
 
     tbody tr {
-      transition: background 0.18s ease;
+      transition: background 0.18s ease, transform 0.18s ease;
     }
 
     tbody tr:hover {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.04);
     }
 
     th {
       color: var(--muted);
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.13em;
     }
 
     body[data-theme="conservative"] th {
-      font-size: 0.76rem;
+      font-size: 0.72rem;
     }
 
     .hint {
       color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.55;
+      font-size: 0.93rem;
+      line-height: 1.65;
     }
 
     .spacer {
       height: 2px;
+    }
+
+    code {
+      padding: 0.16em 0.42em;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: #d8e6fb;
+      font-size: 0.92em;
+    }
+
+    [data-busy="true"] button {
+      opacity: 0.82;
+      cursor: progress;
+    }
+
+    [data-busy="true"] .sync-state {
+      border-style: dashed;
+    }
+
+    .empty-row td {
+      padding: 22px 14px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .empty-row td strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 6px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .empty-row td span {
+      display: block;
+      font-size: 0.94rem;
+      line-height: 1.6;
+    }
+
+    @keyframes loadingPulse {
+      0%, 100% { transform: translateY(0); filter: brightness(1); }
+      50% { transform: translateY(-1px); filter: brightness(1.08); }
     }
 
     @media (max-width: 980px) {
@@ -552,6 +707,7 @@
     @media (max-width: 640px) {
       .wrap {
         width: min(100% - 20px, 1200px);
+        padding-top: 18px;
       }
 
       .cards,
@@ -571,6 +727,19 @@
       h1 {
         max-width: none;
       }
+
+      .hero-card,
+      .panel {
+        border-radius: 22px;
+      }
+
+      .meta {
+        padding: 20px;
+      }
+
+      table {
+        min-width: 720px;
+      }
     }
   </style>
 </head>
@@ -586,7 +755,7 @@
         </div>
         <h1>Dashboard despesas EHS 2026</h1>
         <p class="lede">
-          Sincronize as despesas com sua API do Porto2026. Informe a URL base da API, a chave do app e use a dashboard sem sair do painel.
+          Sincronize as despesas com sua API do Porto2026. Informe a URL base da API, a senha do app e use a dashboard sem sair do painel.
         </p>
         <div class="pill-row">
           <span class="pill">Texto, foto/print e áudio</span>
@@ -616,8 +785,8 @@
           <button id="loadData" type="button">Carregar dados</button>
           <button id="exportCsv" class="secondary" type="button">Exportar CSV</button>
         </div>
-        <div class="status" id="status">Configure a API base URL e a chave para sincronizar.</div>
-        <div class="sync-state" id="syncState" data-tone="idle">Sincronização ainda não executada.</div>
+        <div class="status" id="status" aria-live="polite">Configure a API base URL e a chave para sincronizar.</div>
+        <div class="sync-state" id="syncState" data-tone="idle" aria-live="polite">Sincronização ainda não executada.</div>
       </div>
     </section>
 
@@ -683,21 +852,28 @@
       <div class="panel records">
         <h2 class="section-title">Últimas despesas</h2>
         <div class="spacer"></div>
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Categoria</th>
-              <th>Descrição</th>
-              <th>Pessoa</th>
-              <th>Moeda</th>
-              <th>Total BRL</th>
-            </tr>
-          </thead>
-          <tbody id="recordsBody">
-            <tr><td colspan="6" class="hint">Carregue os dados para ver o histórico mais recente.</td></tr>
-          </tbody>
-        </table>
+        <div class="table-frame">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Categoria</th>
+                <th>Descrição</th>
+                <th>Pessoa</th>
+                <th>Moeda</th>
+                <th>Total BRL</th>
+              </tr>
+            </thead>
+            <tbody id="recordsBody">
+              <tr class="empty-row">
+                <td colspan="6">
+                  <strong>Sem dados carregados ainda</strong>
+                  <span>Carregue os dados para ver o histórico mais recente.</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   </div>
@@ -714,6 +890,7 @@
     const themePremiumButton = document.getElementById("themePremium");
     const themeConservativeButton = document.getElementById("themeConservative");
     const bodyNode = document.body;
+    let busyDepth = 0;
 
     const localDefaultBase = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
       ? "http://127.0.0.1:8000"
@@ -763,13 +940,20 @@
       statusNode.textContent = message;
     }
 
+    function setBusy(active) {
+      busyDepth = active ? busyDepth + 1 : Math.max(0, busyDepth - 1);
+      bodyNode.dataset.busy = busyDepth > 0 ? "true" : "false";
+    }
+
     function setSyncState(message) {
       syncStateNode.textContent = message;
       syncStateNode.dataset.tone = message.includes("bem-sucedida")
         ? "success"
         : message.includes("não concluída")
           ? "error"
-          : "idle";
+          : message.includes("Carregando")
+            ? "loading"
+            : "idle";
     }
 
     function renderSummary(summary) {
@@ -790,7 +974,14 @@
 
     function renderRecords(records) {
       if (!records.length) {
-        recordsBody.innerHTML = '<tr><td colspan="6" class="hint">Nenhuma despesa encontrada.</td></tr>';
+        recordsBody.innerHTML = `
+          <tr class="empty-row">
+            <td colspan="6">
+              <strong>Nenhuma despesa encontrada</strong>
+              <span>Quando houver dados sincronizados, eles aparecem aqui com a leitura mais recente.</span>
+            </td>
+          </tr>
+        `;
         return;
       }
       recordsBody.innerHTML = records.map((item) => `
@@ -843,7 +1034,9 @@
         return;
       }
 
+      setBusy(true);
       setStatus("Carregando dados da API...");
+      setSyncState("Carregando dados...");
       try {
         const [summary, expenses] = await Promise.all([
           fetchJson("/summary"),
@@ -856,6 +1049,8 @@
       } catch (error) {
         setStatus("Falha ao carregar dados.");
         setSyncState("Sincronização não concluída.");
+      } finally {
+        setBusy(false);
       }
     }
 
@@ -868,6 +1063,7 @@
         return;
       }
 
+      setBusy(true);
       try {
         const response = await fetch(apiUrl("/export/csv"), { headers: apiHeaders() });
         if (!response.ok) {
@@ -887,6 +1083,8 @@
       } catch (error) {
         setStatus("Falha na exportação CSV.");
         setSyncState("Sincronização não concluída.");
+      } finally {
+        setBusy(false);
       }
     }
 
@@ -904,6 +1102,7 @@
         setSyncState("Sincronização não concluída.");
         return;
       }
+      setBusy(true);
       try {
         await fetchJson("/expense/text", {
           method: "POST",
@@ -916,6 +1115,8 @@
       } catch (error) {
         setStatus("Erro ao salvar despesa de texto.");
         setSyncState("Sincronização não concluída.");
+      } finally {
+        setBusy(false);
       }
     }
 
@@ -939,6 +1140,7 @@
       const attachmentUrl = document.getElementById("photoAttachmentUrl").value.trim();
       if (hint) formData.append("hint", hint);
       if (attachmentUrl) formData.append("attachment_url", attachmentUrl);
+      setBusy(true);
       try {
         await fetchJson("/expense/photo", {
           method: "POST",
@@ -950,6 +1152,8 @@
       } catch (error) {
         setStatus("Erro ao salvar foto/print.");
         setSyncState("Sincronização não concluída.");
+      } finally {
+        setBusy(false);
       }
     }
 
@@ -969,6 +1173,7 @@
       }
       const formData = new FormData();
       formData.append("file", file);
+      setBusy(true);
       try {
         await fetchJson("/expense/audio", {
           method: "POST",
@@ -980,6 +1185,8 @@
       } catch (error) {
         setStatus("Erro ao salvar áudio.");
         setSyncState("Sincronização não concluída.");
+      } finally {
+        setBusy(false);
       }
     }
 
